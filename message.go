@@ -731,9 +731,16 @@ type Envelope struct {
 
 // Parse an envelope from fields.
 func (e *Envelope) Parse(fields []interface{}) error {
-	if len(fields) < 10 {
-		return errors.New("ENVELOPE doesn't contain 10 fields")
+	if len(fields) < 9 {
+		return errors.New("ENVELOPE doesn't contain 9 fields")
+	}else{
+		if len(fields) == 9{ //Email that does not contain BCC
+
+		}else if len(fields) < 10 {
+			return errors.New("ENVELOPE doesn't contain 10 fields")
+		}
 	}
+
 
 	if date, ok := fields[0].(string); ok {
 		e.Date, _ = parseMessageDateTime(date)
@@ -756,15 +763,28 @@ func (e *Envelope) Parse(fields []interface{}) error {
 	if cc, ok := fields[6].([]interface{}); ok {
 		e.Cc = ParseAddressList(cc)
 	}
-	if bcc, ok := fields[7].([]interface{}); ok {
-		e.Bcc = ParseAddressList(bcc)
+	if len(fields) == 9{
+		if bcc, ok := fields[7].([]interface{}); ok {
+			e.Bcc = ParseAddressList(bcc)
+		}
+		if inReplyTo, ok := fields[7].(string); ok {
+			e.InReplyTo = inReplyTo
+		}
+		if msgId, ok := fields[8].(string); ok {
+			e.MessageId = msgId
+		}
+	}else{
+		if bcc, ok := fields[7].([]interface{}); ok {
+			e.Bcc = ParseAddressList(bcc)
+		}
+		if inReplyTo, ok := fields[8].(string); ok {
+			e.InReplyTo = inReplyTo
+		}
+		if msgId, ok := fields[9].(string); ok {
+			e.MessageId = msgId
+		}
 	}
-	if inReplyTo, ok := fields[8].(string); ok {
-		e.InReplyTo = inReplyTo
-	}
-	if msgId, ok := fields[9].(string); ok {
-		e.MessageId = msgId
-	}
+
 
 	return nil
 }
